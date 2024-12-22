@@ -282,7 +282,7 @@ if __name__ == "__main__":
     print("\n")
 
     parser = argparse.ArgumentParser(
-        epilog="A subdomain enumeration tool without API keys.",
+        epilog="A subdomain and admin page enumeration tool without API keys.",
         usage="\npython3 WSASDH.py -s example.com \npython3 WSASDH.py -a example.com"
     )
     parser.add_argument("-s", "--subdomain", help="Enumerate subdomains for a given domain", metavar="")
