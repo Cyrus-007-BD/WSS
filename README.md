@@ -24,11 +24,11 @@ Web Attack is a powerful tool designed for web penetration testing and security 
 
 2. Clone the repository:
    ```bash
-   $ git clone https://github.com/Cyrus-007-BD/WSSDH.git
+   $ git clone https://github.com/Cyrus-007-BD/WSASDH.git
    ```
-3. Go to WSSDH directory:
+3. Go to WSASDH directory:
    ```bash
-   $ cd WSSDH
+   $ cd WSASDH
    ```
 4. Run the program:
    ```bash
