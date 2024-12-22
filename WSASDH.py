@@ -8,13 +8,15 @@ from bs4 import BeautifulSoup # type: ignore
 import re
 from queue import Queue
 from colorama import init, Fore
+import argparse
+import time
 
 # Initialize colorama for colored output
 init(autoreset=True)
 
 # Global set to store unique subdomains
 subdomains = set()
-
+admin_pages = []
 # Mutex lock for thread safety
 lock = threading.Lock()
 
@@ -23,344 +25,31 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 }
 
-#List of admin paths to chack
-common_admin_paths = [
-    "/private.php",
-    "/robots.txt",
-    "/photoalbum/upload/",
-    "/_vti_pvt/",
-    ":5800/",
-    "/phpMyAdmin/",
-    "/config.html/",
-    "/private/",
-    "/admin1.php",
-    "/admin1.html",
-    "/admin2.php",
-    "/admin2.html",
-    "/yonetim.php",
-    "/yonetim.html",
-    "/yonetici.php",
-    "/yonetici.html",
-    "/adm/",
-    "/admin/",
-    "/admin/account.php",
-    "/admin/account.html",
-    "/admin/index.php",
-    "/admin/index.html",
-    "/admin/login.php",
-    "/admin/login.html",
-    "/admin/home.php",
-    "/admin/controlpanel.html",
-    "/admin/controlpanel.php",
-    "/admin.php",
-    "/admin.html",
-    "/admin/cp.php",
-    "/admin/cp.html",
-    "/cp.php",
-    "/cp.html",
-    "/administrator/",
-    "/administrator/index.html",
-    "/administrator/index.php",
-    "/administrator/login.html",
-    "/administrator/login.php",
-    "/administrator/account.html",
-    "/administrator/account.php",
-    "/administrator.php",
-    "/administrator.html",
-    "/login.php",
-    "/login.html",
-    "/modelsearch/login.php",
-    "/moderator.php",
-    "/moderator.html",
-    "/moderator/login.php",
-    "/moderator/login.html",
-    "/moderator/admin.php",
-    "/moderator/admin.html",
-    "/account.php",
-    "/account.html",
-    "/controlpanel/",
-    "/controlpanel.php",
-    "/controlpanel.html",
-    "/admincontrol.php",
-    "/admincontrol.html",
-    "/adminpanel.php",
-    "/adminpanel.html",
-    "/admin1.asp",
-    "/admin2.asp",
-    "/yonetim.asp",
-    "/yonetici.asp",
-    "/admin/account.asp",
-    "/admin/index.asp",
-    "/admin/login.asp",
-    "/admin/home.asp",
-    "/admin/controlpanel.asp",
-    "/admin.asp",
-    "/admin/cp.asp",
-    "/cp.asp",
-    "/administrator/index.asp",
-    "/administrator/login.asp",
-    "/administrator/account.asp",
-    "/administrator.asp",
-    "/login.asp",
-    "/modelsearch/login.asp",
-    "/moderator.asp",
-    "/moderator/login.asp",
-    "/moderator/admin.asp",
-    "/account.asp",
-    "/controlpanel.asp",
-    "/admincontrol.asp",
-    "/adminpanel.asp",
-    "/fileadmin/",
-    "/fileadmin.php",
-    "/fileadmin.asp",
-    "/fileadmin.html",
-    "/administration/",
-    "/administration.php",
-    "/administration.html",
-    "/sysadmin.php",
-    "/sysadmin.html",
-    "/phpmyadmin/",
-    "/myadmin/",
-    "/sysadmin.asp",
-    "/sysadmin/",
-    "/ur-admin.asp",
-    "/ur-admin.php",
-    "/ur-admin.html",
-    "/ur-admin/",
-    "/Server.php",
-    "/Server.html",
-    "/Server.asp",
-    "/Server/",
-    "/wp-admin/",
-    "/administr8.php",
-    "/administr8.html",
-    "/administr8/",
-    "/administr8.asp",
-    "/webadmin/",
-    "/webadmin.php",
-    "/webadmin.asp",
-    "/webadmin.html",
-    "/administratie/",
-    "/admins/",
-    "/admins.php",
-    "/admins.asp",
-    "/admins.html",
-    "/administrivia/",
-    "/Database_Administration/",
-    "/WebAdmin/",
-    "/useradmin/",
-    "/sysadmins/",
-    "/admin1/",
-    "/system-administration/",
-    "/administrators/",
-    "/pgadmin/",
-    "/directadmin/",
-    "/staradmin/",
-    "/ServerAdministrator/",
-    "/SysAdmin/",
-    "/administer/",
-    "/LiveUser_Admin/",
-    "/sys-admin/",
-    "/typo3/",
-    "/panel/",
-    "/cpanel/",
-    "/cPanel/",
-    "/cpanel_file/",
-    "/platz_login/",
-    "/rcLogin/",
-    "/blogindex/",
-    "/formslogin/",
-    "/autologin/",
-    "/support_login/",
-    "/meta_login/",
-    "/manuallogin/",
-    "/simpleLogin/",
-    "/loginflat/",
-    "/utility_login/",
-    "/showlogin/",
-    "/memlogin/",
-    "/members/",
-    "/login-redirect/",
-    "/sub-login/",
-    "/wp-login/",
-    "/login1/",
-    "/dir-login/",
-    "/login_db/",
-    "/xlogin/",
-    "/smblogin/",
-    "/customer_login/",
-    "/UserLogin/",
-    "/login-us/",
-    "/acct_login/",
-    "/admin_area/",
-    "/bigadmin/",
-    "/project-admins/",
-    "/phppgadmin/",
-    "/pureadmin/",
-    "/sql-admin/",
-    "/radmind/",
-    "/openvpnadmin/",
-    "/wizmysqladmin/",
-    "/vadmind/",
-    "/ezsqliteadmin/",
-    "/hpwebjetadmin/",
-    "/newsadmin/",
-    "/adminpro/",
-    "/Lotus_Domino_Admin/",
-    "/bbadmin/",
-    "/vmailadmin/",
-    "/Indy_admin/",
-    "/ccp14admin/",
-    "/irc-macadmin/",
-    "/banneradmin/",
-    "/sshadmin/",
-    "/phpldapadmin/",
-    "/macadmin/",
-    "/administratoraccounts/",
-    "/admin4_account/",
-    "/admin4_colon/",
-    "/radmind-1/",
-    "/Super-Admin/",
-    "/AdminTools/",
-    "/cmsadmin/",
-    "/SysAdmin2/",
-    "/globes_admin/",
-    "/cadmins/",
-    "/phpSQLiteAdmin/",
-    "/navSiteAdmin/",
-    "/server_admin_small/",
-    "/logo_sysadmin/",
-    "/server/",
-    "/database_administration/",
-    "/power_user/",
-    "/system_administration/",
-    "/ss_vms_admin_sm/",
-    "/bb-admin/",
-    "/panel-administracion/",
-    "/instadmin/",
-    "/memberadmin/",
-    "/administratorlogin/",
-    "/adm.%EXT%",
-    "/admin_login.%EXT%",
-    "/panel-administracion/login.%EXT%",
-    "/pages/admin/admin-login.%EXT%",
-    "/pages/admin/",
-    "/acceso.%EXT%",
-    "/admincp/login.%EXT%",
-    "/admincp/",
-    "/adminarea/",
-    "/admincontrol/",
-    "/affiliate.%EXT%",
-    "/adm_auth.%EXT%",
-    "/memberadmin.%EXT%",
-    "/administratorlogin.%EXT%",
-    "/modules/admin/",
-    "/administrators.%EXT%",
-    "/siteadmin/",
-    "/siteadmin.%EXT%",
-    "/adminsite/",
-    "/kpanel/",
-    "/vorod/",
-    "/vorod.%EXT%",
-    "/vorud/",
-    "/vorud.%EXT%",
-    "/adminpanel/",
-    "/PSUser/",
-    "/secure/",
-    "/webmaster/",
-    "/webmaster.%EXT%",
-    "/autologin.%EXT%",
-    "/userlogin.%EXT%",
-    "/admin_area.%EXT%",
-    "/cmsadmin.%EXT%",
-    "/security/",
-    "/usr/",
-    "/root/",
-    "/secret/",
-    "/admin/login.%EXT%",
-    "/admin/adminLogin.%EXT%",
-    "/moderator.php",
-    "/moderator.html",
-    "/moderator/login.%EXT%",
-    "/moderator/admin.%EXT%",
-    "/yonetici.%EXT%",
-    "/0admin/",
-    "/0manager/",
-    "/aadmin/",
-    "/cgi-bin/login%EXT%",
-    "/login1%EXT%",
-    "/login_admin/",
-    "/login_admin%EXT%",
-    "/login_out/",
-    "/login_out%EXT%",
-    "/login_user%EXT%",
-    "/loginerror/",
-    "/loginok/",
-    "/loginsave/",
-    "/loginsuper/",
-    "/loginsuper%EXT%",
-    "/login%EXT%",
-    "/logout/",
-    "/logout%EXT%",
-    "/secrets/",
-    "/super1/",
-    "/super1%EXT%",
-    "/super_index%EXT%",
-    "/super_login%EXT%",
-    "/supermanager%EXT%",
-    "/superman%EXT%",
-    "/superuser%EXT%",
-    "/supervise/",
-    "/supervise/Login%EXT%",
-    "/super%EXT%",
-    "/admin1.php",
-    "/admin1.html",
-    "/admin2.php",
-    "/admin2.html",
-    "/yonetim.php",
-    "/yonetim.html",
-    "/yonetici.php",
-    "/yonetici.html",
-    "/adm/",
-    "/admin/",
-    "/admin/account.php",
-    "/admin/account.html",
-    "/admin/index.php",
-    "/admin/index.html",
-    "/admin/login.php",
-    "/admin/login.html",
-    "/admin/home.php",
-    "/admin/controlpanel.html",
-    "/admin/controlpanel.php",
-    "/admin.php",
-    "/admin.html",
-    "/admin/cp.php",
-    "/admin/cp.html",
-    "/cp.php",
-    "/cp.html",
-    "/administrator/",
-    "/administrator/index.html",
-    "/administrator/index.php",
-    "/administrator/login.html",
-    "/administrator/login.php",
-    "/administrator/account.html",
-    "/administrator/account.php",
-    "/administrator.php",
-    "/administrator.html",
-    "/login.php",
-    "/login.html",
-    "/modelsearch/login.php",
-    "/moderator.php",
-    "/moderator.html",
-    "/moderator/login.php",
-    "/moderator/login.html",
-    "/moderator/admin.php",
-    "/moderator/admin.html"
-]
-
 # GitHub repository details for the update feature
 GITHUB_REPO_URL = "https://raw.githubusercontent.com/Cyrus-007-BD/WSSDH/blob/main/WSSDH.py"
 CURRENT_VERSION = "1.0"
+
+def load_admin_paths_from_file(file_path="admin.txt"):
+    """Load admin paths from the given file."""
+    if not os.path.exists(file_path):
+        print(Fore.RED + f"[ERROR] {file_path} does not exist.")
+        return []
+    
+    with open(file_path, 'r') as file:
+        admin_paths = [line.strip() for line in file.readlines() if line.strip() and not line.startswith('#')]
+    
+    return admin_paths
+
+def load_custom_list(file_path):
+    """Load a custom list of domains or subdomains from a provided file."""
+    if not os.path.exists(file_path):
+        print(Fore.RED + f"[ERROR] {file_path} does not exist.")
+        return []
+    
+    with open(file_path, 'r') as file:
+        items = [line.strip() for line in file.readlines() if line.strip()]
+    
+    return items
 
 def fetch_crtsh(domain):
     """Fetch subdomains from crt.sh"""
@@ -379,7 +68,7 @@ def fetch_crtsh(domain):
         else:
             print(Fore.RED + f"[-] crt.sh request failed with status code {response.status_code}")
     except Exception as e:
-        print(Fore.RED + f"[-] Error fetching crt.sh: {e}")
+        print(Fore.RED + f"[Error] fetching crt.sh: {e}")
 
 def fetch_bing(domain):
     """Fetch subdomains from Bing search results"""
@@ -398,7 +87,7 @@ def fetch_bing(domain):
         else:
             print(Fore.RED + f"[-] Bing request failed with status code {response.status_code}")
     except Exception as e:
-        print(Fore.RED + f"[-] Error fetching Bing: {e}")
+        print(Fore.RED + f"[Error] fetching Bing: {e}")
 
 def fetch_duckduckgo(domain):
     """Fetch subdomains from DuckDuckGo search results"""
@@ -417,7 +106,7 @@ def fetch_duckduckgo(domain):
         else:
             print(Fore.RED + f"[-] DuckDuckGo request failed with status code {response.status_code}")
     except Exception as e:
-        print(Fore.RED + f"[-] Error fetching DuckDuckGo: {e}")
+        print(Fore.RED + f"[Error] fetching DuckDuckGo: {e}")
 
 def fetch_wordlist_subdomains(domain, wordlist_file="subdomains.txt"):
     """Fetch subdomains from a local wordlist using DNS resolution"""
@@ -481,6 +170,7 @@ def enumerate_subdomains(domain):
 
 # Function to check if admin page exists
 def check_admin_page(url, path):
+    """Function to check if admin page exists"""
     admin_url = url + path
     try:
         response = requests.get(admin_url, timeout=5)
@@ -493,12 +183,22 @@ def check_admin_page(url, path):
         else:
             print(Fore.RED + f"[-] No admin page found at: {admin_url}")
     except requests.exceptions.RequestException as e:
-        print(Fore.RED + f"[-] Error checking {admin_url}: {e}")
+        print(Fore.RED + f"[Error] checking {admin_url}: {e}")
 
-def check_admins_on_domain(domain):
+def check_admins_on_domain(domain, admin_paths=None):
+    """Search for admin pages using provided paths or fallback to admin.txt."""
     print(Fore.CYAN + f"\n\n[INFO] Starting admin page search on {domain}")
-    # Loop through each common admin path and check if it exists
-    for path in common_admin_paths:
+    
+    # Use provided admin paths or load from admin.txt if not provided
+    if admin_paths is None or not admin_paths:
+        admin_paths = load_admin_paths_from_file()
+    
+    if not admin_paths:
+        print(Fore.RED + "[ERROR] No admin paths found.")
+        return
+
+    # Loop through each admin path and check if it exists
+    for path in admin_paths:
         check_admin_page(domain, path)
 
 # Function to ensure the domain starts with http:// or https://
@@ -512,20 +212,37 @@ def add_https_www(url):
             url = url.replace('http://', 'http://www.').replace('https://', 'https://www.')
     return url
 
+def process_file(file_path, mode, custom_list=None):
+    """Process a list of domains from a file with optional custom lists."""
+    if not os.path.isfile(file_path):
+        print(Fore.RED + f"[ERROR] File '{file_path}' not found.")
+        sys.exit(1)
+
+    # Load custom admin paths if provided
+    admin_paths = load_admin_paths_from_file(custom_list) if mode == "admin" and custom_list else None
+
+    with open(file_path, 'r') as file:
+        domains = [line.strip() for line in file if line.strip()]
+
+    for domain in domains:
+        clear_terminal()
+        print(Fore.CYAN + f"[INFO] Processing domain: {domain}")
+
+        if mode == "subdomain":
+            enumerate_subdomains(domain)
+        elif mode == "admin":
+            check_admins_on_domain(f"https://{domain}", admin_paths)
+        subdomains.clear()
+        admin_pages.clear()
+        time.sleep(2)  # Pause briefly before processing the next 
+
 def print_banner():
-    banner = ("""
-               _____        _____          _         _       
-\ \      / /      |   \ /\   / ____|        | |       | |      
- \ \ /\ / /  ___| |  | /  \ | |      _ _ | |_ ___  | |    
-  \ V  V / _ \/ _ \ |  | | /\ \| |    / _` | '| / _ \ | '_ \   
-   \ /\ /  /  / || |/  \ | |___| (_| | |  | ||  / | | | |  
-    \/  \/ \___|\___|_____//_/ \_\\_____\,_|_|   \__\___| |_| |_|  
-                                                                     
-     WSASDH - Web Subdomain Admin Search and Discovery Helper
-     Discover subdomains quickly and efficiently!
-     Author: Cyrus_007
-""")
-    print(Fore.RED + banner)
+    import pyfiglet 
+    result = pyfiglet.figlet_format("WSASDH", font = "big", justify="left", width=5000)
+    print (Fore.RED + result + "\t\t\t\t\t--v0.1--")
+    print(Fore.RED + "WSASDH - Web Subdomain Admin Search and Discovery Helper")
+    print(Fore.RED + "Discover subdomains and admin paths quickly and efficiently!")
+    print(Fore.RED + "Author: Cyrus_007")
 
 def clear_terminal():
     # Clear the terminal based on the platform
@@ -538,7 +255,7 @@ def clear_terminal():
 def check_for_update():
     """Check for updates from the GitHub repository"""
     try:
-        print(Fore.CYAN + "[INFO] Checking for updates...")
+        print(Fore.CYAN + "\n[INFO] Checking for updates...")
         response = requests.get(GITHUB_REPO_URL, headers=HEADERS)
         if response.status_code == 200:
             with open(__file__, 'r') as current_file:
@@ -553,35 +270,29 @@ def check_for_update():
             else:
                 print(Fore.GREEN + "[INFO] You are using the latest version.")
         else:
-            print(Fore.RED + f"[-] Failed to check for updates (status code: {response.status_code})")
+            print(Fore.RED + f"[Failed] to check for updates (status code: {response.status_code})")
     except Exception as e:
-        print(Fore.RED + f"[-] Error checking for updates: {e}")
+        print(Fore.RED + f"[Error] checking for updates: {e}")
 
 if __name__ == "__main__":
-    import argparse
-
     clear_terminal()
     print_banner()
     check_for_update()
 
-    import argparse
+    print("\n")
 
     parser = argparse.ArgumentParser(
-        description="Author - Cyrus_007\nA subdomain enumeration tool without API keys.",
-        epilog="Example usage:\n  python3 WSSDH.py example.com",
-        usage="python3 WSSDH.py [domain]",
-        formatter_class=argparse.RawTextHelpFormatter
+        epilog="A subdomain enumeration tool without API keys.",
+        usage="\npython3 WSASDH.py -s example.com \npython3 WSASDH.py -a example.com"
     )
-
-    parser.add_argument(
-        "domain",
-        help="The target domain to enumerate subdomains for (e.g., example.com)."
-    )
-
+    parser.add_argument("-s", "--subdomain", help="Enumerate subdomains for a given domain", metavar="")
+    parser.add_argument("-a", "--admin", help="Search for admin pages on a given domain", metavar="")
     args = parser.parse_args()
-    enumerate_subdomains(args.domain)
 
-    # Ensure the domain starts with http:// or https://
-    domain = add_https_www(args.domain)
-    
-    check_admins_on_domain(domain)
+    if args.subdomain:
+        enumerate_subdomains(args.subdomain)
+    elif args.admin:
+        check_admins_on_domain(f"https://{args.admin}", load_admin_paths_from_file())
+    else:
+        print(Fore.RED + "[!] Please specify either -s for subdomain search or -a for admin page search.")
+        sys.exit(1)

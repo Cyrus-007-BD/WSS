@@ -18,8 +18,10 @@ Web Attack is a powerful tool designed for web penetration testing and security 
 
 1. Install the necessary libraries:
    ```bash
-   $ pip install requests beautifulsoup4 colorama
+   $ sudo apt install python3-art
+   $ sudo apt install python3-pyfiglet
    ```
+
 2. Clone the repository:
    ```bash
    $ git clone https://github.com/Cyrus-007-BD/WSSDH.git
