@@ -32,5 +32,6 @@ Web Attack is a powerful tool designed for web penetration testing and security 
    ```
 4. Run the program:
    ```bash
-   $ python3 WSSDH.py [Domain]
+   $ python3 WSASDH.py -s [Domain] /
+   $ python3 WSASDH.py -a [Domain]
    ```
