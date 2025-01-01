@@ -1,4 +1,4 @@
-# Web Subdomain Search and Discovery Helper
+# Web Security Scanner
 
 Web Attack is a powerful tool designed for web penetration testing and security analysis. It allows users to conduct subdomain discovery to help improve the security posture of websites and web applications.
 
