@@ -1,4 +1,4 @@
-# Web Security Scanner
+# WSS - Web Security Scanner
 
 Web Attack is a powerful tool designed for web penetration testing and security analysis. It allows users to conduct subdomain discovery to help improve the security posture of websites and web applications.
 
@@ -24,14 +24,14 @@ Web Attack is a powerful tool designed for web penetration testing and security 
 
 2. Clone the repository:
    ```bash
-   $ git clone https://github.com/Cyrus-007-BD/WSASDH.git
+   $ git clone https://github.com/Cyrus-007-BD/WSS.git
    ```
-3. Go to WSASDH directory:
+3. Go to WSS directory:
    ```bash
-   $ cd WSASDH
+   $ cd WSS
    ```
 4. Run the program:
    ```bash
-   $ python3 WSASDH.py -s [Domain] /
-   $ python3 WSASDH.py -a [Domain]
+   $ python3 WSS.py -s [Domain] /
+   $ python3 WSS.py -a [Domain]
    ```
