@@ -240,7 +240,7 @@ def print_banner():
     import pyfiglet 
     result = pyfiglet.figlet_format("WSASDH", font = "big", justify="left", width=5000)
     print (Fore.RED + result + "\t\t\t\t\t--v0.1--")
-    print(Fore.RED + "WSASDH - Web Subdomain Admin Search and Discovery Helper")
+    print(Fore.RED + "WSASDH - Web Security Scanner")
     print(Fore.RED + "Discover subdomains and admin paths quickly and efficiently!")
     print(Fore.RED + "Author: Cyrus_007")
 
