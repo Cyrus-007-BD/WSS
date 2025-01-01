@@ -4,7 +4,8 @@ Web Attack is a powerful tool designed for web penetration testing and security 
 
 ## Features
 
-- Subdomain Discovery: Discover subdomains of a given domain to map out potential attack vectors.
+- Subdomain Discovery: <br>Automatically discovers subdomains of a target domain to identify potential attack vectors. This feature helps map the digital footprint of a domain, exposing hidden or less-secured services that may be vulnerable to exploitation.<br>
+- Admin Site Discovery: Discover admin site of a given domain to map out potential attack vectors
 - Clean Terminal Output: Clear the terminal screen automatically on startup for better readability.
 - Cross-platform: Works on Windows, Linux, and macOS.
 
