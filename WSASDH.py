@@ -238,11 +238,11 @@ def process_file(file_path, mode, custom_list=None):
 
 def print_banner():
     import pyfiglet 
-    result = pyfiglet.figlet_format("WSASDH", font = "big", justify="left", width=5000)
-    print (Fore.RED + result + "\t\t\t\t\t--v0.1--")
-    print(Fore.RED + "WSASDH - Web Security Scanner")
-    print(Fore.RED + "Discover subdomains and admin paths quickly and efficiently!")
-    print(Fore.RED + "Author: Cyrus_007")
+    result = pyfiglet.figlet_format("WSS", font ="big", justify="left", width=5000)
+    print (Fore.WHITE + result + "\t\t\t\t\t--v0.1--")
+    print(Fore.CYAN + "WSS - Web Security Scanner")
+    print(Fore.CYAN + "Discover subdomains and admin paths quickly and efficiently!")
+    print(Fore.CYAN + "Author: Cyrus_007")
 
 def clear_terminal():
     # Clear the terminal based on the platform
@@ -252,41 +252,16 @@ def clear_terminal():
     else:
         os.system('clear')
 
-def check_for_update():
-    """Check for updates from the GitHub repository"""
-    try:
-        print(Fore.CYAN + "\n[INFO] Checking for updates...")
-        response = requests.get(GITHUB_REPO_URL, headers=HEADERS)
-        if response.status_code == 200:
-            with open(__file__, 'r') as current_file:
-                current_content = current_file.read()
-            latest_content = response.text
-            if latest_content != current_content:
-                print(Fore.YELLOW + "[INFO] New update found! Updating...")
-                with open(__file__, 'w') as current_file:
-                    current_file.write(latest_content)
-                print(Fore.GREEN + "[+] Update successful! Please restart the script.")
-                sys.exit(0)
-            else:
-                print(Fore.GREEN + "[INFO] You are using the latest version.")
-        else:
-            print(Fore.RED + f"[Failed] to check for updates (status code: {response.status_code})")
-    except Exception as e:
-        print(Fore.RED + f"[Error] checking for updates: {e}")
-
 if __name__ == "__main__":
     clear_terminal()
     print_banner()
-    check_for_update()
-
-    print("\n")
 
     parser = argparse.ArgumentParser(
-        epilog="A subdomain and admin page enumeration tool without API keys.",
+        epilog="\nA subdomain and admin page enumeration tool without API keys.",
         usage="\npython3 WSASDH.py -s example.com \npython3 WSASDH.py -a example.com"
     )
-    parser.add_argument("-s", "--subdomain", help="Enumerate subdomains for a given domain", metavar="")
-    parser.add_argument("-a", "--admin", help="Search for admin pages on a given domain", metavar="")
+    parser.add_argument("-s", "--subdomain", action="store_true", help="Enumerate subdomains for a given domain")
+    parser.add_argument("-a", "--admin", action="store_true", help="Search for admin pages on a given domain")
     args = parser.parse_args()
 
     if args.subdomain:
