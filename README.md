@@ -1,6 +1,6 @@
 # WSS - Web Security Scanner
 
-Web Attack is a powerful tool designed for web penetration testing and security analysis. It allows users to conduct subdomain discovery to help improve the security posture of websites and web applications.
+The tool enhances cybersecurity workflows with key features such as subdomain discovery, which identifies hidden or less-secured services to map a domain's digital footprint. It also includes admin site detection to locate critical login portals or admin panels for better protection. A clean terminal output ensures clarity and focus, while cross-platform compatibility allows seamless use across Windows, Linux, and macOS, catering to security professionals regardless of their operating environment.
 
 ## Features
 
